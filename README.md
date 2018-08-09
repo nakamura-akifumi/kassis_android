@@ -1,4 +1,4 @@
-# kassis_android
+# kassis_picking_android
 Android端末を利用した物品ピッキングアプリ
 
 ##  製作者・貢献者 (Authors and contributors)
