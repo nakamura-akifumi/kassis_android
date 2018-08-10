@@ -7,10 +7,10 @@
     tools:context=".MainActivity">
 
     <Button
-        android:id="@+id/button3"
+        android:id="@+id/selectButton"
         android:layout_width="335dp"
         android:layout_height="63dp"
-        android:layout_marginBottom="204dp"
+        android:layout_marginBottom="136dp"
         android:layout_marginEnd="16dp"
         android:layout_marginStart="16dp"
         android:text="業務選択"
@@ -30,28 +30,38 @@
         app:layout_constraintVertical_bias="0.079" />
 
     <Button
-        android:id="@+id/button"
+        android:id="@+id/workButton"
         android:layout_width="335dp"
         android:layout_height="63dp"
-        android:layout_marginBottom="276dp"
+        android:layout_marginBottom="292dp"
         android:layout_marginEnd="16dp"
         android:layout_marginStart="16dp"
         android:text="業務開始・継続"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.428"
         app:layout_constraintStart_toStartOf="parent" />
 
     <Button
-        android:id="@+id/button2"
-        android:layout_width="335dp"
+        android:id="@+id/settingButton"
+        android:layout_width="136dp"
         android:layout_height="63dp"
         android:layout_marginBottom="16dp"
         android:layout_marginEnd="16dp"
-        android:layout_marginStart="16dp"
         android:text="設定変更"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.428"
-        app:layout_constraintStart_toStartOf="parent" />
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <Button
+        android:id="@+id/button5"
+        android:layout_width="136dp"
+        android:layout_height="64dp"
+        android:layout_marginBottom="16dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="56dp"
+        android:text="その他"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/selectButton" />
 
 </android.support.constraint.ConstraintLayout>
