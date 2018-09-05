@@ -5,6 +5,8 @@ buildscript {
     repositories {
         google()
         jcenter()
+        mavenCentral()
+        maven { url 'https://jitpack.io' }
     }
     dependencies {
         classpath 'com.android.tools.build:gradle:3.1.4'
@@ -12,6 +14,7 @@ buildscript {
 
         // NOTE: Do not place your application dependencies here; they belong
         // in the individual module build.gradle files
+        classpath 'com.github.pschroen:slack-api-android:c66cc8d997'
     }
 }
 
@@ -19,6 +22,10 @@ allprojects {
     repositories {
         google()
         jcenter()
+
+        repositories {
+            maven { url 'https://jitpack.io' }
+        }
     }
 }
 
