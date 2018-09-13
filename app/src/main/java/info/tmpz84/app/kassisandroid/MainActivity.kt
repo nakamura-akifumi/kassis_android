@@ -14,6 +14,16 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
+        val settingButton: Button = findViewById(R.id.settingButton) as Button
+        settingButton.setOnClickListener {
+            val intent: Intent = Intent(this, SettingsActivity::class.java)
+            startActivityForResult(intent, MY_REQUEST_CODE)
+        }
+        val sendButton: Button = findViewById(R.id.sendButton) as Button
+        sendButton.setOnClickListener {
+            val intent: Intent = Intent(this, SendActivity::class.java)
+            startActivityForResult(intent, MY_REQUEST_CODE)
+        }
         val workButton: Button = findViewById(R.id.workButton) as Button
         workButton.setOnClickListener {
 

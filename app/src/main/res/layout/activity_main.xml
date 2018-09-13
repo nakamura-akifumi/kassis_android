@@ -10,13 +10,13 @@
         android:id="@+id/selectButton"
         android:layout_width="335dp"
         android:layout_height="63dp"
-        android:layout_marginBottom="136dp"
+        android:layout_marginBottom="240dp"
         android:layout_marginEnd="16dp"
         android:layout_marginStart="16dp"
         android:text="業務選択"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.428"
+        app:layout_constraintHorizontal_bias="0.529"
         app:layout_constraintStart_toStartOf="parent" />
 
     <TextView
@@ -33,13 +33,13 @@
         android:id="@+id/workButton"
         android:layout_width="335dp"
         android:layout_height="63dp"
-        android:layout_marginBottom="292dp"
+        android:layout_marginBottom="356dp"
         android:layout_marginEnd="16dp"
         android:layout_marginStart="16dp"
         android:text="業務開始・継続"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.428"
+        app:layout_constraintHorizontal_bias="0.529"
         app:layout_constraintStart_toStartOf="parent" />
 
     <Button
@@ -61,6 +61,19 @@
         android:layout_marginTop="56dp"
         android:text="その他"
         app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/selectButton"
+        app:layout_constraintVertical_bias="1.0" />
+
+    <Button
+        android:id="@+id/sendButton"
+        android:layout_width="328dp"
+        android:layout_height="65dp"
+        android:layout_marginEnd="27dp"
+        android:layout_marginStart="27dp"
+        android:layout_marginTop="61dp"
+        android:text="送信・終了"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/selectButton" />
 
