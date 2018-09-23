@@ -14,7 +14,7 @@
     </string>
 
     <string name="pref_title_display_name">Display name</string>
-    <string name="pref_default_display_name">John Smith</string>
+    <string name="pref_default_display_name"></string>
 
     <string name="pref_default_slack_api_token">xoxb-00000000000-000000000000-xxxxxxxxxxxxxxxxxxxxxxxx</string>
 

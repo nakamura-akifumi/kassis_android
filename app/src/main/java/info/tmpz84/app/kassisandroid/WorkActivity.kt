@@ -24,7 +24,7 @@ class WorkActivity : AppCompatActivity() {
 
     override fun onPause() {
         super.onPause()
-
+        Log.i("WorkActivity","WorkActivity onPause")
         realm.close()
     }
 

@@ -6,31 +6,27 @@ import allbegray.slack.rtm.Event
 import allbegray.slack.rtm.SlackRealTimeMessagingClient
 import allbegray.slack.type.Channel
 import android.content.Context
-import android.os.Build
 import android.os.Bundle
+import android.os.Handler
 import android.preference.PreferenceManager
 import android.support.v7.app.AppCompatActivity
 import android.util.Log
+import android.view.Gravity
 import android.widget.Toast
 import io.realm.Realm
 import kotlinx.android.synthetic.main.activity_send.*
 
-
-
 class SendActivity : AppCompatActivity() {
 
-    lateinit var realm: Realm
+    val handler = Handler()
 
     override fun onResume() {
         super.onResume()
-
-        realm = Realm.getDefaultInstance()
     }
 
     override fun onPause() {
         super.onPause()
 
-        realm.close()
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -40,45 +36,47 @@ class SendActivity : AppCompatActivity() {
         btnSend.setOnClickListener {
             Log.i("WorkActivity", "btnConnect.setOnClickListener")
 
-            if ("sdk".equals(Build.PRODUCT)) {
-                // エミュレータの場合はIPv6を無効
-                Log.i("WorkActivity", "IPv6 disable")
-                java.lang.System.setProperty("java.net.preferIPv6Addresses", "false")
-                java.lang.System.setProperty("java.net.preferIPv4Stack", "true")
-            }
-
             // Bot User OAuth Acces Token
             val preferencesName = PreferenceManager.getDefaultSharedPreferencesName(this.applicationContext)
             val mSharedPref = getSharedPreferences(preferencesName, Context.MODE_PRIVATE)
             var slackToken = mSharedPref.getString("pref_slack_api_token", "")
-
+            var displayName = mSharedPref.getString("pref_display_name", "")
             var webSocketUrl = ""
+            val sendItems = mutableListOf<ItemDB>()
 
+            var realm:Realm = Realm.getDefaultInstance()
             val items = realm.where(ItemDB::class.java).findAll()
             items.forEach {
-                Log.i("SendActivity", "item=$it.str_item_identifier")
-                Log.i("SendActivity", "datetime=$it.str_datetime")
+                // TODO: 送信スレッド側にコピーせずにしたい。
+                val item = ItemDB()
+                item.str_item_identifier = it.str_item_identifier.toString()
+                item.str_datetime = it.str_datetime.toString()
 
+                sendItems.add(item)
             }
-
+            realm.close()
+            Log.d("SendActivity", "prepare sendings.")
 
             Thread({
                 Log.i("WorkActivity", "Thread @1 token=$slackToken")
-
-                Log.i("WorkActivity", "Thread @2 get realm instance")
-                var realm2:Realm = Realm.getDefaultInstance()
 
                 var mWebApiClient = SlackClientFactory.createWebApiClient(slackToken)
                 try {
                     webSocketUrl = mWebApiClient.startRealTimeMessagingApi().findPath("url").asText()
                 } catch (e: Exception) {
                     Log.e("WorkActivity", e.message)
-                    realm2.close()
+                    handler.post(Runnable {
+                        statusView.setText("slack接続時にエラーが発生しました。 ${e.message}")
+                        var ts:Toast = Toast.makeText(this@SendActivity, "接続時にエラーが発生しました。", Toast.LENGTH_SHORT)
+                        ts.setGravity(Gravity.CENTER, 0, 0);
+                        ts.show()
+                    })
                     return@Thread
                 }
                 Log.i("SendActivity", "Thread @3")
                 var mRtmClient = SlackRealTimeMessagingClient(webSocketUrl)
                 var mBotId = ""
+                var sendCount = 0
 
                 mRtmClient.addListener(Event.HELLO) { message ->
 
@@ -91,17 +89,28 @@ class SendActivity : AppCompatActivity() {
                     Log.i("SendActivity", "Team name: " + authentication.team)
                     Log.i("SendActivity", "User name: " + authentication.user)
 
-                    val items = realm2.where(ItemDB::class.java).findAll()
-                    items.forEach {
+                    mWebApiClient.postMessage("databus_dev", "!buscmd/sendtrans/begin/${displayName}")
+
+                    sendItems.forEach {
                         Log.i("SendActivity", "item=$it.str_item_identifier")
                         Log.i("SendActivity", "datetime=$it.str_datetime")
 
-                        mWebApiClient.postMessage("databus_dev", "item=$it.str_item_identifier")
+                        val msg = "${displayName},${it.str_item_identifier.toString()},${it.str_datetime.toString()}"
+
+                        mWebApiClient.postMessage("databus_dev", msg)
+                        sendCount++
                     }
+                    mWebApiClient.postMessage("databus_dev", "!buscmd/sendtrans/end/${displayName}")
 
-                    realm2.close()
-                    Toast.makeText(this@SendActivity, "送信しました", Toast.LENGTH_SHORT).show()
+                    // Handlerを使用してメイン(UI)スレッドに処理を依頼する
+                    handler.post(Runnable {
+                        statusView.setText("送信しました。送信件数=${sendCount}")
+                        var ts:Toast = Toast.makeText(this@SendActivity, "送信しました。", Toast.LENGTH_SHORT)
+                        ts.setGravity(Gravity.CENTER, 0, 0);
+                        ts.show()
 
+                        postProcess(1, sendCount)
+                    })
                 }
 
                 mRtmClient.addListener(Event.MESSAGE) { message ->
@@ -135,4 +144,15 @@ class SendActivity : AppCompatActivity() {
             }).start()
         }
     }
+
+    fun postProcess(status: Int, count: Int, message: String = "") {
+        Log.i("SendActivity", "start postProcess")
+        // TODO: 正常時はレコード削除
+        var realm:Realm = Realm.getDefaultInstance()
+        realm.delete(ItemDB::class.java)
+        realm.close()
+        Log.d("SendActivity", "complete postProcess")
+
+    }
+
 }
