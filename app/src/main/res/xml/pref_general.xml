@@ -12,6 +12,16 @@
 
     <EditTextPreference
         android:capitalize="words"
+        android:defaultValue="@string/pref_default_slack_channel"
+        android:inputType="textCapWords"
+        android:key="pref_slack_channel"
+        android:maxLines="1"
+        android:selectAllOnFocus="true"
+        android:singleLine="true"
+        android:title="Slack Channel" />
+
+    <EditTextPreference
+        android:capitalize="words"
         android:defaultValue="@string/pref_default_display_name"
         android:inputType="textCapWords"
         android:key="pref_display_name"

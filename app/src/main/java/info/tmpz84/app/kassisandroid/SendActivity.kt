@@ -39,8 +39,9 @@ class SendActivity : AppCompatActivity() {
             // Bot User OAuth Acces Token
             val preferencesName = PreferenceManager.getDefaultSharedPreferencesName(this.applicationContext)
             val mSharedPref = getSharedPreferences(preferencesName, Context.MODE_PRIVATE)
-            var slackToken = mSharedPref.getString("pref_slack_api_token", "")
-            var displayName = mSharedPref.getString("pref_display_name", "")
+            val slackToken = mSharedPref.getString("pref_slack_api_token", "")
+            val displayName = mSharedPref.getString("pref_display_name", "")
+            val slackChannel = mSharedPref.getString("pref_slack_channel", "")
             var webSocketUrl = ""
             val sendItems = mutableListOf<ItemDB>()
 
@@ -58,13 +59,13 @@ class SendActivity : AppCompatActivity() {
             Log.d("SendActivity", "prepare sendings.")
 
             Thread({
-                Log.i("WorkActivity", "Thread @1 token=$slackToken")
+                Log.i("SendActivity", "Thread @1 token=${slackToken} channel=${slackChannel}")
 
                 var mWebApiClient = SlackClientFactory.createWebApiClient(slackToken)
                 try {
                     webSocketUrl = mWebApiClient.startRealTimeMessagingApi().findPath("url").asText()
                 } catch (e: Exception) {
-                    Log.e("WorkActivity", e.message)
+                    Log.e("SendActivity", e.message)
                     handler.post(Runnable {
                         statusView.setText("slack接続時にエラーが発生しました。 ${e.message}")
                         var ts:Toast = Toast.makeText(this@SendActivity, "接続時にエラーが発生しました。", Toast.LENGTH_SHORT)
@@ -89,7 +90,7 @@ class SendActivity : AppCompatActivity() {
                     Log.i("SendActivity", "Team name: " + authentication.team)
                     Log.i("SendActivity", "User name: " + authentication.user)
 
-                    mWebApiClient.postMessage("databus_dev", "!buscmd/sendtrans/begin/${displayName}")
+                    mWebApiClient.postMessage(slackChannel, "!buscmd/sendtrans/begin/${displayName}")
 
                     sendItems.forEach {
                         Log.i("SendActivity", "item=$it.str_item_identifier")
@@ -97,10 +98,10 @@ class SendActivity : AppCompatActivity() {
 
                         val msg = "${displayName},${it.str_item_identifier.toString()},${it.str_datetime.toString()}"
 
-                        mWebApiClient.postMessage("databus_dev", msg)
+                        mWebApiClient.postMessage(slackChannel, msg)
                         sendCount++
                     }
-                    mWebApiClient.postMessage("databus_dev", "!buscmd/sendtrans/end/${displayName}")
+                    mWebApiClient.postMessage(slackChannel, "!buscmd/sendtrans/end/${displayName}")
 
                     // Handlerを使用してメイン(UI)スレッドに処理を依頼する
                     handler.post(Runnable {
@@ -111,6 +112,8 @@ class SendActivity : AppCompatActivity() {
 
                         postProcess(1, sendCount)
                     })
+
+                    return@addListener
                 }
 
                 mRtmClient.addListener(Event.MESSAGE) { message ->
@@ -146,13 +149,14 @@ class SendActivity : AppCompatActivity() {
     }
 
     fun postProcess(status: Int, count: Int, message: String = "") {
-        Log.i("SendActivity", "start postProcess")
+        Log.i("SendActivity", "start postProcess status=${status} cnt=${count}")
         // TODO: 正常時はレコード削除
         var realm:Realm = Realm.getDefaultInstance()
+        realm.beginTransaction();
         realm.delete(ItemDB::class.java)
+        realm.commitTransaction();
         realm.close()
         Log.d("SendActivity", "complete postProcess")
-
     }
 
 }

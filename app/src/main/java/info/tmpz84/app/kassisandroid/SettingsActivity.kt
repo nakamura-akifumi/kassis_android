@@ -79,7 +79,9 @@ class SettingsActivity : AppCompatPreferenceActivity() {
             // updated to reflect the new value, per the Android Design
             // guidelines.
             bindPreferenceSummaryToValue(findPreference("pref_slack_api_token"))
+            bindPreferenceSummaryToValue(findPreference("pref_slack_channel"))
             bindPreferenceSummaryToValue(findPreference("pref_display_name"))
+
         }
 
         override fun onOptionsItemSelected(item: MenuItem): Boolean {
