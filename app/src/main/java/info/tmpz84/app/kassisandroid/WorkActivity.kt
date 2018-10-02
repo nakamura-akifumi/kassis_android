@@ -52,8 +52,8 @@ class WorkActivity : AppCompatActivity() {
 
         val items = realm.where(ItemDB::class.java).findAll()
         items.forEach {
-            Log.i("SendActivity", "item=$it.str_item_identifier")
-            Log.i("SendActivity", "datetime=$it.str_datetime")
+            Log.d("SendActivity", "item=$it.str_item_identifier")
+            Log.d("SendActivity", "datetime=$it.str_datetime")
 
             item_list.append(it.str_item_identifier)
             item_list.append("\n")
@@ -67,7 +67,7 @@ class WorkActivity : AppCompatActivity() {
 
             itemDB.str_item_identifier = sItemIdentifier
             val date: Date = Date()
-            itemDB.str_datetime = DateFormat.format("yyyy/MM/dd kk:mm:ss", date).toString()
+            itemDB.str_datetime = DateFormat.format("yyyyMMddkkmmss", date).toString()
             itemDB.str_eventid = "1"
             itemDB.str_machinename = "1"
 

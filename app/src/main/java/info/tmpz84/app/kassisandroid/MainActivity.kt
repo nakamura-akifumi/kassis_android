@@ -35,6 +35,10 @@ class MainActivity : AppCompatActivity() {
             startActivityForResult(intent, MY_REQUEST_CODE)
         }
 
+        toolsButton.setOnClickListener {
+            val intent: Intent = Intent(this, ToolActivity::class.java)
+            startActivityForResult(intent, MY_REQUEST_CODE)
+        }
 
 
     }

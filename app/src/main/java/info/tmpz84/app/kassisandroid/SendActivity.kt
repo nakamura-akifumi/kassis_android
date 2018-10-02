@@ -33,6 +33,15 @@ class SendActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_send)
 
+        progressBar.visibility = android.widget.ProgressBar.INVISIBLE
+        progressBar.max = 100
+
+        var realm:Realm = Realm.getDefaultInstance()
+        val items = realm.where(ItemDB::class.java).findAll()
+        val item_size = items.size
+        realm.close()
+        statusView.setText("現在の保存件数:${item_size}")
+
         btnSend.setOnClickListener {
             Log.i("WorkActivity", "btnConnect.setOnClickListener")
 
@@ -47,6 +56,7 @@ class SendActivity : AppCompatActivity() {
 
             var realm:Realm = Realm.getDefaultInstance()
             val items = realm.where(ItemDB::class.java).findAll()
+            val item_size = items.size
             items.forEach {
                 // TODO: 送信スレッド側にコピーせずにしたい。
                 val item = ItemDB()
@@ -79,6 +89,10 @@ class SendActivity : AppCompatActivity() {
                 var mBotId = ""
                 var sendCount = 0
 
+                handler.post(Runnable {
+                    progressBar.visibility = android.widget.ProgressBar.VISIBLE
+                })
+
                 mRtmClient.addListener(Event.HELLO) { message ->
 
                     Log.i("SendActivity", "HELLO.onMessage")
@@ -86,29 +100,31 @@ class SendActivity : AppCompatActivity() {
                     val authentication = mWebApiClient.auth()
                     mBotId = authentication.user_id
 
-                    Log.i("SendActivity", "User id: $mBotId")
-                    Log.i("SendActivity", "Team name: " + authentication.team)
-                    Log.i("SendActivity", "User name: " + authentication.user)
-
                     mWebApiClient.postMessage(slackChannel, "!buscmd/sendtrans/begin/${displayName}")
 
                     sendItems.forEach {
-                        Log.i("SendActivity", "item=$it.str_item_identifier")
-                        Log.i("SendActivity", "datetime=$it.str_datetime")
+                        Log.d("SendActivity", "item=$it.str_item_identifier")
+                        Log.d("SendActivity", "datetime=$it.str_datetime")
 
                         val msg = "${displayName},${it.str_item_identifier.toString()},${it.str_datetime.toString()}"
 
                         mWebApiClient.postMessage(slackChannel, msg)
                         sendCount++
+
+                        handler.post(Runnable {
+                            progressBar.progress = (sendCount / item_size) * 100
+                        })
                     }
                     mWebApiClient.postMessage(slackChannel, "!buscmd/sendtrans/end/${displayName}")
 
                     // Handlerを使用してメイン(UI)スレッドに処理を依頼する
                     handler.post(Runnable {
-                        statusView.setText("送信しました。送信件数=${sendCount}")
+                        statusView.setText("送信しました。送信件数:${sendCount}")
                         var ts:Toast = Toast.makeText(this@SendActivity, "送信しました。", Toast.LENGTH_SHORT)
                         ts.setGravity(Gravity.CENTER, 0, 0);
                         ts.show()
+
+                        //progressBar.visibility = android.widget.ProgressBar.INVISIBLE
 
                         postProcess(1, sendCount)
                     })
@@ -132,11 +148,8 @@ class SendActivity : AppCompatActivity() {
                         val user = mWebApiClient.getUserInfo(userId)
                         val userName = user.name
 
-                        Log.i("WorkActivity","Channel id: $channelId")
-                        Log.i("WorkActivity","Channel name: " + if (channel != null) "#" + channel!!.getName() else "DM")
-                        Log.i("WorkActivity","User id: $userId")
-                        Log.i("WorkActivity","User name: $userName")
-                        Log.i("WorkActivity","Text: $text")
+                        Log.d("WorkActivity","Channel id: $channelId")
+                        Log.d("WorkActivity","Channel name: " + if (channel != null) "#" + channel!!.getName() else "DM")
 
                         mWebApiClient.meMessage(channelId, "$userName: $text")
                     }
@@ -150,7 +163,6 @@ class SendActivity : AppCompatActivity() {
 
     fun postProcess(status: Int, count: Int, message: String = "") {
         Log.i("SendActivity", "start postProcess status=${status} cnt=${count}")
-        // TODO: 正常時はレコード削除
         var realm:Realm = Realm.getDefaultInstance()
         realm.beginTransaction();
         realm.delete(ItemDB::class.java)
